@@ -1,44 +1,34 @@
-// const express = require('express');
-// const router = express.Router();
-// const studentController = require('../controllers/studentController.js');
-
-// // Routes for CRUD operations on students
-// router.post('/students', studentController.createStudent);
-// router.get('/students', studentController.getAllStudents);
-// router.get('/students/:id', studentController.getStudentById);
-// router.put('/students/:id', studentController.updateStudentById);
-// router.delete('/students/:id', studentController.deleteStudentById);
-
-// module.exports = router;
-
-
 import express from "express";
-// Curly braces { } ke andar functions ko import karein
-import { 
-    createStudent, 
-    getAllStudents, 
-    getStudentById, 
-    updateStudentById, 
-    deleteStudentById 
+import {
+  registerStudent,
+  loginStudent,
+  forgotPasswordStudent,
+  getCurrentStudent,
+  getStudentById,
+  updateStudentDetails,
+  getAllStudents,
+  deleteStudent,
+  logoutStudent,
 } from "../controllers/studentController.js";
+
+import { verifyJWT } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// --- STUDENT CRUD ROUTES ---
+// ==================== STUDENT (purana URL pattern) ====================
+router.post("/studentregister", registerStudent);
+router.post("/studentlogin", loginStudent);
+router.post("/studentforgetpassword", forgotPasswordStudent);
 
-// Route to create a new student record
-router.post('/students', createStudent);
+router.get("/studentprofile", verifyJWT, getCurrentStudent);
+router.get("/studentprofileid/:id", verifyJWT, getStudentById);
+router.get("/studentprofileall", verifyJWT, getAllStudents);
 
-// Route to get a list of all students
-router.get('/students', getAllStudents);
+router.put("/studentprofileedit", verifyJWT, updateStudentDetails);
+router.put("/studentprofileeditid/:id", verifyJWT, updateStudentDetails);
 
-// Route to get details of a specific student by ID
-router.get('/students/:id', getStudentById);
+router.delete("/deletestudent/:id", verifyJWT, deleteStudent);
 
-// Route to update a student's information by ID
-router.put('/students/:id', updateStudentById);
-
-// Route to delete a student record by ID
-router.delete('/students/:id', deleteStudentById);
+router.post("/studentlogout", verifyJWT, logoutStudent);
 
 export default router;

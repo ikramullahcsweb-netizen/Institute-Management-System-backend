@@ -1,173 +1,159 @@
-// const StudentModel = require('../models/Students.js');
-
-// // Controller function to create a new student
-// exports.createStudent = async (req, res) => {
-//     try {
-//         const student = new StudentModel(req.body);
-//         await student.save();
-//         res.status(201).json(student);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-// // Controller function to get all students
-// exports.getAllStudents = async (req, res) => {
-//     try {
-//         const students = await StudentModel.find();
-//         res.status(200).json(students);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-// // Controller function to get a single student by ID
-// exports.getStudentById = async (req, res) => {
-//     try {
-//         const student = await StudentModel.findById(req.params.id);
-//         if (!student) {
-//             return res.status(404).json({ message: 'Student not found' });
-//         }
-//         res.status(200).json(student);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-// // Controller function to update a student by ID
-// exports.updateStudentById = async (req, res) => {
-//     try {
-//         const student = await StudentModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//         if (!student) {
-//             return res.status(404).json({ message: 'Student not found' });
-//         }
-//         res.status(200).json(student);
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-// // Controller function to delete a student by ID
-// exports.deleteStudentById = async (req, res) => {
-//     try {
-//         const student = await StudentModel.findByIdAndDelete(req.params.id);
-//         if (!student) {
-//             return res.status(404).json({ message: 'Student not found' });
-//         }
-//         res.status(204).send(); // No content
-//     } catch (error) {
-//         res.status(500).json({ message: error.message });
-//     }
-// };
-
-
-
-
-
-import mongoose from "mongoose";
-import { StudentModel } from "../models/Students.js"; // Verify precise path structure
+import { StudentModel } from "../models/Student.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-// @desc    Controller function to create a new student
-// @route   POST /api/v1/students
-const createStudent = asyncHandler(async (req, res) => {
-    // Basic field sanity check (Schema rules update kar sakte hain)
-    if (!req.body) {
-        throw new ApiError(400, "Student registration content parameters missing");
-    }
+const cookieOptions = { httpOnly: true, secure: true };
 
-    const student = await StudentModel.create(req.body);
+const generateTokens = async (studentId) => {
+  try {
+    const student = await StudentModel.findById(studentId);
+    const accessToken = student.generateAccessToken();
+    const refreshToken = student.generateRefreshToken();
+    student.refreshToken = refreshToken;
+    await student.save({ validateBeforeSave: false });
+    return { accessToken, refreshToken };
+  } catch {
+    throw new ApiError(500, "Something went wrong while generating tokens");
+  }
+};
 
-    if (!student) {
-        throw new ApiError(500, "Something went wrong while enrolling the student");
-    }
+// REGISTER — StudentRegister.jsx form se yahi call hota hai
+const registerStudent = asyncHandler(async (req, res) => {
+  const { name, email, contactnumber, grade, username, stdid, walletid, password } = req.body;
 
-    return res
-        .status(201)
-        .json(new ApiResponse(201, student, "Student enrolled successfully"));
+  if (!name?.trim() || !email?.trim() || !username?.trim() || !password?.trim()) {
+    throw new ApiError(400, "Name, email, username, and password are required");
+  }
+  if (!grade?.trim() || !stdid?.trim()) {
+    throw new ApiError(400, "Grade and Student ID are required");
+  }
+
+  const existedStudent = await StudentModel.findOne({
+    $or: [{ email: email.toLowerCase() }, { stdid }, { username }],
+  });
+  if (existedStudent) {
+    throw new ApiError(409, "Student with this email, username, or Student ID already exists");
+  }
+
+  const student = await StudentModel.create({
+    name,
+    email: email.toLowerCase(),
+    contactnumber,
+    grade,
+    username,
+    stdid,
+    walletid,
+    password,
+  });
+
+  const createdStudent = await StudentModel.findById(student._id).select("-password -refreshToken");
+  if (!createdStudent) throw new ApiError(500, "Something went wrong while registering the student");
+
+  return res.status(201).json(new ApiResponse(201, createdStudent, "Student registered successfully ✅"));
 });
 
-// @desc    Controller function to get all students
-// @route   GET /api/v1/students
-const getAllStudents = asyncHandler(async (req, res) => {
-    const students = await StudentModel.find();
+// LOGIN
+const loginStudent = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  if (!email || !password) throw new ApiError(400, "Email and password are required");
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, students, "All students data registry fetched"));
+  const student = await StudentModel.findOne({ email: email.toLowerCase() });
+  if (!student) throw new ApiError(404, "Student does not exist");
+
+  const isPasswordValid = await student.isPasswordCorrect(password);
+  if (!isPasswordValid) throw new ApiError(401, "Invalid credentials");
+
+  const { accessToken, refreshToken } = await generateTokens(student._id);
+  const loggedInStudent = await StudentModel.findById(student._id).select("-password -refreshToken");
+
+  return res
+    .status(200)
+    .cookie("accessToken", accessToken, cookieOptions)
+    .cookie("refreshToken", refreshToken, cookieOptions)
+    .json(new ApiResponse(200, { student: loggedInStudent, accessToken }, "Student logged in successfully ✅"));
 });
 
-// @desc    Controller function to get a single student by ID
-// @route   GET /api/v1/students/:id
+// FORGOT PASSWORD
+const forgotPasswordStudent = asyncHandler(async (req, res) => {
+  const { email, SecAnswer, newPassword } = req.body;
+  if (!email || !SecAnswer || !newPassword) {
+    throw new ApiError(400, "Email, Security Answer, and New Password are required");
+  }
+
+  const student = await StudentModel.findOne({ email: email.toLowerCase(), SecAnswer });
+  if (!student) throw new ApiError(400, "Wrong email or security answer");
+
+  student.password = newPassword;
+  await student.save({ validateBeforeSave: false });
+
+  return res.status(200).json(new ApiResponse(200, {}, "Password reset successfully ✅"));
+});
+
+// CURRENT LOGGED-IN STUDENT
+const getCurrentStudent = asyncHandler(async (req, res) => {
+  return res.status(200).json(new ApiResponse(200, req.user, "Current student fetched successfully ✅"));
+});
+
+// GET ONE BY ID
 const getStudentById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new ApiError(400, "Invalid Student Record ID format");
-    }
-
-    const student = await StudentModel.findById(id);
-
-    if (!student) {
-        throw new ApiError(404, "Student dashboard record not found");
-    }
-
-    return res
-        .status(200)
-        .json(new ApiResponse(200, student, "Student record matching ID verified"));
+  const student = await StudentModel.findById(req.params.id).select("-password -refreshToken");
+  if (!student) throw new ApiError(404, "Student not found");
+  return res.status(200).json(new ApiResponse(200, student, "Student fetched successfully ✅"));
 });
 
-// @desc    Controller function to update a student by ID
-// @route   PUT /api/v1/students/:id
-const updateStudentById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
-
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new ApiError(400, "Invalid Student Record ID format");
-    }
-
-    const student = await StudentModel.findByIdAndUpdate(
-        id, 
-        { $set: req.body }, 
-        { new: true, runValidators: true }
-    );
-
-    if (!student) {
-        throw new ApiError(404, "Student target row not found to update");
-    }
-
-    return res
-        .status(200)
-        .json(new ApiResponse(200, student, "Student account attributes optimized"));
+// GET ALL
+const getAllStudents = asyncHandler(async (req, res) => {
+  const students = await StudentModel.find().select("-password -refreshToken");
+  return res.status(200).json(new ApiResponse(200, students, "All students fetched successfully ✅"));
 });
 
-// @desc    Controller function to delete a student by ID
-// @route   DELETE /api/v1/students/:id
-const deleteStudentById = asyncHandler(async (req, res) => {
-    const { id } = req.params;
+// UPDATE — apna profile ya (admin ho toh) :id se kisi aur ka
+const updateStudentDetails = asyncHandler(async (req, res) => {
+  const targetId = req.params.id || req.user?._id;
+  const updateData = { ...req.body };
 
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-        throw new ApiError(400, "Invalid Student Record ID format");
-    }
+  delete updateData.password;
+  delete updateData.refreshToken;
 
-    const student = await StudentModel.findByIdAndDelete(id);
+  if (updateData.email) updateData.email = updateData.email.toLowerCase();
 
-    if (!student) {
-        throw new ApiError(404, "Student record target already missing");
-    }
+  const student = await StudentModel.findByIdAndUpdate(
+    targetId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).select("-password -refreshToken");
 
-    return res
-        .status(200)
-        .json(new ApiResponse(200, {}, "Student removed from registry database logs"));
+  if (!student) throw new ApiError(404, "Student not found");
+  return res.status(200).json(new ApiResponse(200, student, "Student profile updated successfully ✅"));
 });
 
-// Export configuration matching clean architecture 
+// DELETE
+const deleteStudent = asyncHandler(async (req, res) => {
+  const student = await StudentModel.findByIdAndDelete(req.params.id);
+  if (!student) throw new ApiError(404, "Student not found");
+  return res.status(200).json(new ApiResponse(200, {}, "Student deleted successfully ✅"));
+});
+
+// LOGOUT
+const logoutStudent = asyncHandler(async (req, res) => {
+  await StudentModel.findByIdAndUpdate(req.user._id, { $unset: { refreshToken: 1 } }, { new: true });
+
+  return res
+    .status(200)
+    .clearCookie("accessToken", cookieOptions)
+    .clearCookie("refreshToken", cookieOptions)
+    .json(new ApiResponse(200, {}, "Student logged out successfully ✅"));
+});
+
 export {
-    createStudent,
-    getAllStudents,
-    getStudentById,
-    updateStudentById,
-    deleteStudentById
+  registerStudent,
+  loginStudent,
+  forgotPasswordStudent,
+  getCurrentStudent,
+  getStudentById,
+  getAllStudents,
+  updateStudentDetails,
+  deleteStudent,
+  logoutStudent,
 };

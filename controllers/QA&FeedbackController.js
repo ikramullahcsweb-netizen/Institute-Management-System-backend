@@ -1,346 +1,3 @@
-// const QuestionModel = require('../models/questions');
-// const TFeedbackModel = require('../models/teacherfeedback');
-// const SFeedbackModel = require('../models/servicefeedback');
-
-// //-------------Student side question-------------------------------------
-// //create question
-// const createque = (req, res) => {
-//     QuestionModel.create(req.body)
-//     .then((data) =>{
-//         res.json(data);
-//     })
-//     .catch((err) =>{
-//         res.json(err);
-//     })
-// }
-
-// //all questions
-// const allque = (req, res) => {
-//     QuestionModel.find()
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //get questions to update
-// const getupdateque = (req, res) => {
-//     const id = req.params.id;
-//     QuestionModel.findById({_id:id})
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //update question
-// const updateque = (req, res) => {
-//     const id = req.params.id;
-//     QuestionModel.findByIdAndUpdate({_id:id},{grade:req.body.grade,subject:req.body.subject,teacher:req.body.teacher,sid:req.body.sid,question:req.body.question})
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //delete question
-// const deleteque = (req, res) => {
-//     const id = req.params.id;
-//     QuestionModel.findByIdAndDelete({_id:id})
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //-------------Teacher side question-------------------------------------
-// //get not anwered questions 
-// const getteacherque = (req, res) => {
-//     QuestionModel.find({answer: {$exists: false}}).select('-answer')
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //give the answer
-// const giveans = (req, res) => {
-//     const { id } = req.params;
-//     QuestionModel.findById(id)
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //update the answer
-// const updateans = (req, res) => {
-//     const { id } = req.params;
-//     const { answer } = req.body;
-//     QuestionModel.findByIdAndUpdate(id, { answer }, { new: true })
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //show the answer in THQuestion
-// const showans = (req, res) => {
-//     QuestionModel.find({answer: {$exists: true}}).exec()
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //get Answer to update
-// const getans = (req, res) => {
-//     const id  = req.params.id;
-//     QuestionModel.findById({_id:id})
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //update Answer
-// const updateanswer = (req, res) => {
-//     const id  = req.params.id; 
-//     QuestionModel.findByIdAndUpdate({_id:id}, { answer :req.body.answer})
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// // delete answer
-// const deleteanswer = (req, res) => {
-//     const { id } = req.params;
-//     QuestionModel.findByIdAndUpdate(id, { $unset: { answer: 1 } }, { new: true })
-//     .then(questions => res.json(questions))
-//     .catch(err => res.json(err));
-// }
-
-// //faq dispaly
-// const displayfaq = (req, res) => {
-//     QuestionModel.find({answer: {$exists: true}})
-//     .then(allQuestions => {
-//     const uniqueQuestions = new Set(); // Set to store unique questions
-
-//     // Filter out repeated questions and questions with empty answers
-//     const filteredQuestions = allQuestions.filter(QuestionModel => {
-//         if (!uniqueQuestions.has(QuestionModel.question) ) {
-//         uniqueQuestions.add(QuestionModel.question);
-//         return true; // Include this question
-//         }
-//         return false; // Skip repeated question or question with empty answer
-//     });
-
-//     res.json(filteredQuestions);
-//     })
-//     .catch(error => {
-//     console.error('Error fetching questions:', error);
-//     res.status(500).json({ error: 'Internal server error' });
-//     });
-// }
-
-// //fAQ search option
-// const searchfaq = (req, res) => {
-//     let { grade, subject } = req.query;
-    
-//     const query = { answer: { $exists: true } };
-
-//     // Check if grade is provided and convert to case-insensitive regular expression
-//     if (grade) {
-//         grade = new RegExp(grade, 'i');
-//         query.grade = grade;
-//     }
-
-//     // Check if subject is provided and convert to case-insensitive regular expression
-//     if (subject) {
-//         subject = new RegExp(subject, 'i');
-//         query.subject = subject;
-//     }
-
-//     QuestionModel.find(query)
-//       .then(allQuestions => {
-//         const uniqueQuestions = new Set(); // Set to store unique questions
-  
-//         // Filter out repeated questions
-//         const filteredQuestions = allQuestions.filter(question => {
-//           if (!uniqueQuestions.has(question.question) ) {
-//             uniqueQuestions.add(question.question);
-//             return true; // Include this question
-//           }
-//           return false; // Skip repeated question
-//         });
-  
-//         res.json(filteredQuestions);
-//       })
-//       .catch(error => {
-//         console.error('Error fetching questions:', error);
-//         res.status(500).json({ error: 'Internal server error' });
-//       });
-// }
-
-// //----------------------------------------------------------------------------------------------------------
-// //create teacher feedback
-// const createteacherfeedback = (req, res) => {
-//     TFeedbackModel.create(req.body)
-//     .then((data) =>{
-//         res.json(data);
-//     })
-//     .catch((err) =>{
-//         res.json(err);
-//     })
-// }
-
-// //create service feedback
-// const createservicefeedback = (req, res) => {
-//     SFeedbackModel.create(req.body)
-//     .then((data) =>{
-//         res.json(data);
-//     })
-//     .catch((err) =>{
-//         res.json(err);
-//     })
-// }
-
-// //get teacher feedbacks
-// const getteacherfeedback = (req, res) => {
-//     TFeedbackModel.find()
-//     .then(tfeedbacks => res.json(tfeedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get service feedbacks
-// const getservicefeedback = (req, res) => {
-//     SFeedbackModel.find()
-//     .then(sfeedbacks => res.json(sfeedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get teacher feedbck to update
-// const getteacherfeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     TFeedbackModel.findById({_id:id})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //update teacher feedback
-// const updateteacherfeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     TFeedbackModel.findByIdAndUpdate({_id:id},{grade:req.body.grade,subject:req.body.subject,teacher:req.body.teacher,sid:req.body.sid,feedback:req.body.tfeedback},{ new: true })
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //delete teacher feedback
-// const deleteteacherfeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     TFeedbackModel.findByIdAndDelete({_id:id})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get service feedback to update
-// const getservicefeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     SFeedbackModel.findById({_id:id})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //delete service feedback
-// const deleteservicefeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     SFeedbackModel.findByIdAndDelete({_id:id})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //update service feedback
-// const updateservicefeedbackid = (req, res) => {
-//     const id = req.params.id;
-//     SFeedbackModel.findByIdAndUpdate({_id:id},{grade:req.body.grade,feedback:req.body.sfeedbacks,date:req.body.date},{ new: true })
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //-----------------------------------Manager side feedback(service feedback)------------------------------------
-// //get not anwered service feedback 
-// const servicefeedbackid = (req, res) => {
-//     SFeedbackModel.find({reply: {$exists: false}}).select('-reply')
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get not anwered service feedback 
-// const giveresponse = (req, res) => {
-//     const { id } = req.params;
-//     SFeedbackModel.findById(id)
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get not anwered service feedback 
-// const gettoreply = (req, res) => {
-//     const { id } = req.params;
-//     const { reply } = req.body;
-//     SFeedbackModel.findByIdAndUpdate(id, { reply }, { new: true })
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //show the reply in ManagerFeedback
-// const showfeedback = (req, res) => {
-//     SFeedbackModel.find({reply: {$exists: true}}).exec()
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //get reply to update
-// const getreply = (req, res) => {
-//     const id  = req.params.id;
-//     SFeedbackModel.findById({_id:id})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //update reply
-// const updatereply = (req, res) => {
-//     const id  = req.params.id; 
-//     SFeedbackModel.findByIdAndUpdate({_id:id}, { reply :req.body.reply})
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// //delete reply
-// const deletereply = (req, res) => {
-//     const { id } = req.params;
-//     SFeedbackModel.findByIdAndUpdate(id, { $unset: { reply: 1 } }, { new: true })
-//     .then(feedbacks => res.json(feedbacks))
-//     .catch(err => res.json(err));
-// }
-
-// module.exports = {
-//     createque,
-//     allque,
-//     getupdateque,
-//     updateque,
-//     deleteque,
-//     getteacherque,
-//     giveans,
-//     updateans,
-//     showans,
-//     getans,
-//     updateanswer,
-//     deleteanswer,
-//     displayfaq,
-//     searchfaq,
-//     createteacherfeedback,
-//     createservicefeedback,
-//     getteacherfeedback,
-//     getservicefeedback,
-//     getteacherfeedbackid,
-//     updateteacherfeedbackid,
-//     deleteteacherfeedbackid,
-//     getservicefeedbackid,
-//     deleteservicefeedbackid,
-//     updateservicefeedbackid,
-//     servicefeedbackid,
-//     giveresponse,
-//     gettoreply,
-//     showfeedback,
-//     getreply,
-//     updatereply,
-//     deletereply
-// }
-
-
-
-
 import mongoose from "mongoose";
 import { questionModel } from "../models/questions.js";
 import { tfeedbackModel } from "../models/teacherfeedback.js";
@@ -359,7 +16,7 @@ const createque = asyncHandler(async (req, res) => {
     const { question, subject, teacher } = req.body;
     if (!question) throw new ApiError(400, "Question body text is required");
 
-    const newQuestion = await QuestionModel.create(req.body);
+    const newQuestion = await questionModel.create(req.body);
     return res
         .status(201)
         .json(new ApiResponse(201, newQuestion, "Question submitted successfully"));
@@ -368,7 +25,7 @@ const createque = asyncHandler(async (req, res) => {
 // @desc    Get all active questions
 // @route   GET /api/v1/interactions/questions
 const allque = asyncHandler(async (req, res) => {
-    const questions = await QuestionModel.find();
+    const questions = await questionModel.find();
     return res
         .status(200)
         .json(new ApiResponse(200, questions, "Questions fetched successfully"));
@@ -380,7 +37,7 @@ const getupdateque = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid Question ID format");
 
-    const question = await QuestionModel.findById(id);
+    const question = await questionModel.findById(id);
     if (!question) throw new ApiError(404, "Question entry not found");
 
     return res
@@ -395,7 +52,7 @@ const updateque = asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid Question ID format");
 
     const { grade, subject, teacher, sid, question } = req.body;
-    const updated = await QuestionModel.findByIdAndUpdate(
+    const updated = await questionModel.findByIdAndUpdate(
         id,
         { $set: { grade, subject, teacher, sid, question } },
         { new: true }
@@ -412,7 +69,7 @@ const deleteque = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid Question ID format");
 
-    await QuestionModel.findByIdAndDelete(id);
+    await questionModel.findByIdAndDelete(id);
     return res
         .status(200)
         .json(new ApiResponse(200, {}, "Question entry removed successfully"));
@@ -425,7 +82,7 @@ const deleteque = asyncHandler(async (req, res) => {
 // @desc    Get active questions lacking answers
 // @route   GET /api/v1/interactions/teacher/unanswered
 const getteacherque = asyncHandler(async (req, res) => {
-    const unanswered = await QuestionModel.find({ answer: { $exists: false } }).select("-answer");
+    const unanswered = await questionModel.find({ answer: { $exists: false } }).select("-answer");
     return res
         .status(200)
         .json(new ApiResponse(200, unanswered, "Unanswered questions workspace loaded"));
@@ -437,7 +94,7 @@ const giveans = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const question = await QuestionModel.findById(id);
+    const question = await questionModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, question, "Target question isolated for answer"));
@@ -450,7 +107,7 @@ const updateans = asyncHandler(async (req, res) => {
     const { answer } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const updated = await QuestionModel.findByIdAndUpdate(id, { $set: { answer } }, { new: true });
+    const updated = await questionModel.findByIdAndUpdate(id, { $set: { answer } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, updated, "Teacher answer registered successfully"));
@@ -459,7 +116,7 @@ const updateans = asyncHandler(async (req, res) => {
 // @desc    Display questions containing valid answer rows
 // @route   GET /api/v1/interactions/questions/answered
 const showans = asyncHandler(async (req, res) => {
-    const answered = await QuestionModel.find({ answer: { $exists: true } });
+    const answered = await questionModel.find({ answer: { $exists: true } });
     return res
         .status(200)
         .json(new ApiResponse(200, answered, "Answered database queries cataloged"));
@@ -471,7 +128,7 @@ const getans = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const response = await QuestionModel.findById(id);
+    const response = await questionModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, response, "Answer block structural parameters fetched"));
@@ -483,7 +140,7 @@ const updateanswer = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const updated = await QuestionModel.findByIdAndUpdate(id, { $set: { answer: req.body.answer } }, { new: true });
+    const updated = await questionModel.findByIdAndUpdate(id, { $set: { answer: req.body.answer } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, updated, "Answer string record modified"));
@@ -495,7 +152,7 @@ const deleteanswer = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const cleared = await QuestionModel.findByIdAndUpdate(id, { $unset: { answer: 1 } }, { new: true });
+    const cleared = await questionModel.findByIdAndUpdate(id, { $unset: { answer: 1 } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, cleared, "Answer field wiped out cleanly"));
@@ -504,7 +161,7 @@ const deleteanswer = asyncHandler(async (req, res) => {
 // @desc    Filter out repeated items to populate unique dynamic FAQ arrays
 // @route   GET /api/v1/interactions/faq
 const displayfaq = asyncHandler(async (req, res) => {
-    const allQuestions = await QuestionModel.find({ answer: { $exists: true } });
+    const allQuestions = await questionModel.find({ answer: { $exists: true } });
     const uniqueQuestions = new Set();
 
     const filteredQuestions = allQuestions.filter(item => {
@@ -529,7 +186,7 @@ const searchfaq = asyncHandler(async (req, res) => {
     if (grade) query.grade = new RegExp(grade, "i");
     if (subject) query.subject = new RegExp(subject, "i");
 
-    const allQuestions = await QuestionModel.find(query);
+    const allQuestions = await questionModel.find(query);
     const uniqueQuestions = new Set();
 
     const filteredQuestions = allQuestions.filter(question => {
@@ -552,7 +209,7 @@ const searchfaq = asyncHandler(async (req, res) => {
 // @desc    Create teacher review row entry
 // @route   POST /api/v1/interactions/feedback/teacher
 const createteacherfeedback = asyncHandler(async (req, res) => {
-    const feedback = await TFeedbackModel.create(req.body);
+    const feedback = await tfeedbackModel.create(req.body);
     return res
         .status(201)
         .json(new ApiResponse(201, feedback, "Teacher performance logging registered"));
@@ -561,7 +218,7 @@ const createteacherfeedback = asyncHandler(async (req, res) => {
 // @desc    Create structural portal service feedback
 // @route   POST /api/v1/interactions/feedback/service
 const createservicefeedback = asyncHandler(async (req, res) => {
-    const feedback = await SFeedbackModel.create(req.body);
+    const feedback = await sfeedbackModel.create(req.body);
     return res
         .status(201)
         .json(new ApiResponse(201, feedback, "Portal institutional review logged"));
@@ -570,7 +227,7 @@ const createservicefeedback = asyncHandler(async (req, res) => {
 // @desc    Fetch complete matrix rows for teacher feedback
 // @route   GET /api/v1/interactions/feedback/teacher
 const getteacherfeedback = asyncHandler(async (req, res) => {
-    const feedback = await TFeedbackModel.find();
+    const feedback = await tfeedbackModel.find();
     return res
         .status(200)
         .json(new ApiResponse(200, feedback, "Teacher feedback array compiled"));
@@ -579,7 +236,7 @@ const getteacherfeedback = asyncHandler(async (req, res) => {
 // @desc    Fetch complete matrix rows for system service reviews
 // @route   GET /api/v1/interactions/feedback/service
 const getservicefeedback = asyncHandler(async (req, res) => {
-    const feedback = await SFeedbackModel.find();
+    const feedback = await sfeedbackModel.find();
     return res
         .status(200)
         .json(new ApiResponse(200, feedback, "System service reports cataloged"));
@@ -591,7 +248,7 @@ const getteacherfeedbackid = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const feedback = await TFeedbackModel.findById(id);
+    const feedback = await tfeedbackModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, feedback, "Target teacher feedback row fetched"));
@@ -604,7 +261,7 @@ const updateteacherfeedbackid = asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
     const { grade, subject, teacher, sid, tfeedback } = req.body;
-    const updated = await TFeedbackModel.findByIdAndUpdate(
+    const updated = await tfeedbackModel.findByIdAndUpdate(
         id,
         { $set: { grade, subject, teacher, sid, feedback: tfeedback } },
         { new: true }
@@ -621,7 +278,7 @@ const deleteteacherfeedbackid = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    await TFeedbackModel.findByIdAndDelete(id);
+    await tfeedbackModel.findByIdAndDelete(id);
     return res
         .status(200)
         .json(new ApiResponse(200, {}, "Teacher evaluation log cleared successfully"));
@@ -633,7 +290,7 @@ const getservicefeedbackid = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const feedback = await SFeedbackModel.findById(id);
+    const feedback = await sfeedbackModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, feedback, "Target service profile entry retrieved"));
@@ -645,7 +302,7 @@ const deleteservicefeedbackid = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    await SFeedbackModel.findByIdAndDelete(id);
+    await sfeedbackModel.findByIdAndDelete(id);
     return res
         .status(200)
         .json(new ApiResponse(200, {}, "Service dashboard record wiped out"));
@@ -658,7 +315,7 @@ const updateservicefeedbackid = asyncHandler(async (req, res) => {
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
     const { grade, sfeedbacks, date } = req.body;
-    const updated = await SFeedbackModel.findByIdAndUpdate(
+    const updated = await sfeedbackModel.findByIdAndUpdate(
         id,
         { $set: { grade, feedback: sfeedbacks, date } },
         { new: true }
@@ -676,7 +333,7 @@ const updateservicefeedbackid = asyncHandler(async (req, res) => {
 // @desc    Get system reviews lacking operational manager response logs
 // @route   GET /api/v1/interactions/manager/unanswered
 const servicefeedbackid = asyncHandler(async (req, res) => {
-    const unansweredFeedbacks = await SFeedbackModel.find({ reply: { $exists: false } }).select("-reply");
+    const unansweredFeedbacks = await sfeedbackModel.find({ reply: { $exists: false } }).select("-reply");
     return res
         .status(200)
         .json(new ApiResponse(200, unansweredFeedbacks, "Unanswered operations review queue compiled"));
@@ -688,7 +345,7 @@ const giveresponse = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const feedback = await SFeedbackModel.findById(id);
+    const feedback = await sfeedbackModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, feedback, "Target review profile row isolated for response"));
@@ -701,7 +358,7 @@ const gettoreply = asyncHandler(async (req, res) => {
     const { reply } = req.body;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const updated = await SFeedbackModel.findByIdAndUpdate(id, { $set: { reply } }, { new: true });
+    const updated = await sfeedbackModel.findByIdAndUpdate(id, { $set: { reply } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, updated, "Administrative reply string committed successfully"));
@@ -710,7 +367,7 @@ const gettoreply = asyncHandler(async (req, res) => {
 // @desc    Display system evaluations containing active manager reply rows
 // @route   GET /api/v1/interactions/manager/replied
 const showfeedback = asyncHandler(async (req, res) => {
-    const repliedFeedbacks = await SFeedbackModel.find({ reply: { $exists: true } });
+    const repliedFeedbacks = await sfeedbackModel.find({ reply: { $exists: true } });
     return res
         .status(200)
         .json(new ApiResponse(200, repliedFeedbacks, "Replied evaluation sets cataloged"));
@@ -722,7 +379,7 @@ const getreply = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const response = await SFeedbackModel.findById(id);
+    const response = await sfeedbackModel.findById(id);
     return res
         .status(200)
         .json(new ApiResponse(200, response, "Reply content structure isolated successfully"));
@@ -734,7 +391,7 @@ const updatereply = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const updated = await SFeedbackModel.findByIdAndUpdate(id, { $set: { reply: req.body.reply } }, { new: true });
+    const updated = await sfeedbackModel.findByIdAndUpdate(id, { $set: { reply: req.body.reply } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, updated, "Administrative comment modified"));
@@ -746,7 +403,7 @@ const deletereply = asyncHandler(async (req, res) => {
     const { id } = req.params;
     if (!mongoose.Types.ObjectId.isValid(id)) throw new ApiError(400, "Invalid ID format");
 
-    const cleared = await SFeedbackModel.findByIdAndUpdate(id, { $unset: { reply: 1 } }, { new: true });
+    const cleared = await sfeedbackModel.findByIdAndUpdate(id, { $unset: { reply: 1 } }, { new: true });
     return res
         .status(200)
         .json(new ApiResponse(200, cleared, "Manager response log parameter string wiped out"));
