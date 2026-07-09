@@ -1,15 +1,9 @@
-
-
-
 import mongoose from "mongoose";
 import { AttendanceModel } from "../models/AttendanceModel.js"; // Verify path and .js extension
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-// @desc    Create a new attendance record
-// @route   POST /api/v1/attendance
-// @access  Protected
 const createAttendance = asyncHandler(async (req, res) => {
     const { studentId, classId, teacherId, subject } = req.body;
 

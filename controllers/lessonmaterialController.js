@@ -8,9 +8,8 @@ import { ApiResponse } from "../utils/ApiResponse.js";
 // @desc    Create a new Notice
 // @route   POST /api/v1/teacher-notices
 const createnotice = asyncHandler(async (req, res) => {
-    const { topic, date, description } = req.body;
+    const { topic, date, description, subject_name, grade, teacher_id } = req.body;
 
-    // Field Validation Check
     if (!topic || !description) {
         throw new ApiError(400, "Topic and Description fields are required");
     }
@@ -18,7 +17,10 @@ const createnotice = asyncHandler(async (req, res) => {
     const notice = await NoticeModel.create({
         topic,
         date,
-        description
+        description,
+        subject_name,
+        grade,
+        teacher_id
     });
 
     if (!notice) {

@@ -18,10 +18,7 @@ import { verifyJWT } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-// ==================== REGISTER (Admin + Manager dono, role body se aata hai) ====================
 router.post("/register", registerAdminManager);
-
-// ==================== LOGIN (role ke hisaab se alag URL, function same) ====================
 router.post("/login", loginAdminManager);          // Admin login
 router.post("/managerlogin", loginAdminManager);   // Manager login
 

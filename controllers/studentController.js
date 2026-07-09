@@ -3,7 +3,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 
-const cookieOptions = { httpOnly: true, secure: true };
+const cookieOptions = { httpOnly: true, secure: false, sameSite: "lax" };
 
 const generateTokens = async (studentId) => {
   try {
